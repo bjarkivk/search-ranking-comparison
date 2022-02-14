@@ -21,19 +21,24 @@ tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
 model = AutoModelForMaskedLM.from_pretrained("KB/bert-base-swedish-cased")
 
 
-# sequences = ["Idag släpper KB tre språkmodeller.", "Jag heter Hans."]
+# Test dataset
+# queries = ["Jag heter Max","Idag släpper KB tre språkmodeller."]
+# paragraphs = [
+#     "Verksamheten är uppdelad på ett antal laboratorier",
+#     "Jättebra",
+# ]
+# labels = [0,1]
 
-batch_sentences = ["Jag heter Max","Idag släpper KB tre språkmodeller."]
-batch_of_second_sentences = [
-    "Verksamheten är uppdelad på ett antal laboratorier",
-    "Jättebra",
-]
-labels = [0,1]
+
+# Real Dataset, read from paragraphs.json bulk upload file
+# Open the list of articles to read
+article_file = open('../articleSampler/articles.txt', 'r')
+lines = article_file.readlines()
 
 
 # Will pad the sequences up to the model max length
-# model_inputs = tokenizer(batch_sentences, batch_of_second_sentences, truncation='longest_first', padding='max_length', max_length=512)
-model_inputs = tokenizer(batch_sentences, batch_of_second_sentences)
+# model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
+model_inputs = tokenizer(queries, paragraphs)
 
 
 
