@@ -1,26 +1,26 @@
 import json
 from random import randrange
-# from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline
-# from transformers import TrainingArguments, Trainer
-# import datasets
-# import torch
+from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline, AutoModelForSequenceClassification
+from transformers import TrainingArguments, Trainer
+import datasets
+import torch
+import torch.utils.data as data
+class WikiDataset(torch.utils.data.Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
 
-# class WikiDataset(torch.utils.data.Dataset):
-#     def __init__(self, encodings, labels):
-#         self.encodings = encodings
-#         self.labels = labels
+    def __getitem__(self, idx):
+        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item['labels'] = torch.tensor(self.labels[idx])
+        return item
 
-#     def __getitem__(self, idx):
-#         item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-#         item['labels'] = torch.tensor(self.labels[idx])
-#         return item
-
-#     def __len__(self):
-#         return len(self.labels)
+    def __len__(self):
+        return len(self.labels)
 
 # Load tokenizer and model
-# tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-# model = AutoModelForMaskedLM.from_pretrained("KB/bert-base-swedish-cased")
+tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
+model = AutoModelForSequenceClassification.from_pretrained("KB/bert-base-swedish-cased")
 
 queries = []
 paragraphs = []
@@ -37,8 +37,8 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-article_file = open('../training_BERT/paragraphs.json', 'r')
-lines = article_file.readlines()
+paragraphsfile = open('../training_BERT/paragraphs_chunked_1_mini.json', 'r')
+lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
 for index, line in enumerate(lines):
@@ -53,19 +53,19 @@ for index, line in enumerate(lines):
 
 pos_count = len(queries)
 
-print("Positive")
-print(len(queries), queries)
-print(len(paragraphs), paragraphs)
-print(len(labels), labels)
+# print("Positive")
+# print(len(queries), queries)
+# print(len(paragraphs), paragraphs)
+# print(len(labels), labels)
 
-# Create negative examples (label = 0)
+# Create as many negative examples as positive (negative: label = 0)
 neg_count = pos_count
 neg_queries = []
 neg_paragraphs = []
 neg_labels = []
 for i in range(neg_count):
     random_index = randrange(neg_count)
-    # Find a paragraph that is paired with another query than its correct query
+    # Find a random paragraph that is paired with another query than its correct query
     while (queries[random_index] == queries[i]): 
         random_index = randrange(neg_count)
     neg_queries.append(queries[i])
@@ -73,28 +73,26 @@ for i in range(neg_count):
     neg_labels.append(0) # these are all negative examples, that is these paragraphs are not relevant to the query
 
 
-print("Negative")
-print(len(neg_queries), neg_queries)
-print(len(neg_paragraphs), neg_paragraphs)
-print(len(neg_labels), neg_labels)
+# print("Negative")
+# print(len(neg_queries), neg_queries)
+# print(len(neg_paragraphs), neg_paragraphs)
+# print(len(neg_labels), neg_labels)
 
 queries.extend(neg_queries)
 paragraphs.extend(neg_paragraphs)
 labels.extend(neg_labels)
 
-print("Both")
-print(len(queries), queries)
-print(len(paragraphs), paragraphs)
-print(len(labels), labels)
+# print("Both")
+# print(len(queries), queries)
+# print(len(paragraphs), paragraphs)
+# print(len(labels), labels)
 
 
 
 
 # Will pad the sequences up to the model max length
-# model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
+model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
 # model_inputs = tokenizer(queries, paragraphs)
-
-
 
 # print(model_inputs)
 
@@ -103,33 +101,82 @@ print(len(labels), labels)
 # print(decoded)
 
 
-# train_dataset = WikiDataset(model_inputs, labels)
 
-# print("train_dataset", train_dataset.encodings, train_dataset.labels)
+dataset = WikiDataset(model_inputs, labels)
+# print("dataset.encodings",dataset.encodings["input_ids"])
+
+# print("dataset.labels",dataset.labels)
+
+
+train_set_size = int(len(dataset) * 0.8)
+val_set_size = len(dataset) - train_set_size
+train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
+# print("val_dataset", val_dataset.dataset)
+# print("val_dataset", val_dataset.indices)
+# print(len(val_dataset))
+# print(len(train_dataset))
+
+# print(val_dataset.labels)
+
 
 
 
 # Training
 
-# training_args = TrainingArguments(
-#     output_dir="./results",
-#     learning_rate=2e-5,
-#     per_device_train_batch_size=16,
-#     per_device_eval_batch_size=16,
-#     num_train_epochs=5,
-#     weight_decay=0.01,
-# )
+training_args = TrainingArguments(
+    output_dir='./results',          # output directory
+    num_train_epochs=3,              # total number of training epochs
+    # per_device_train_batch_size=16,  # batch size per device during training
+    # per_device_eval_batch_size=64,   # batch size for evaluation
+    warmup_steps=500,                # number of warmup steps for learning rate scheduler
+    weight_decay=0.01,               # strength of weight decay
+    logging_dir='./logs',            # directory for storing logs
+    logging_steps=10,
+    optim='adamw_torch',
+)
 
-# trainer = Trainer(
-#     model=model,
-#     args=training_args,
-#     train_dataset=tokenized_imdb["train"],
-#     eval_dataset=tokenized_imdb["test"],
-#     tokenizer=tokenizer,
-#     data_collator=data_collator,
-# )
 
-# trainer.train()
+trainer = Trainer(
+    model=model,                         # the instantiated 🤗 Transformers model to be trained
+    args=training_args,                  # training arguments, defined above
+    train_dataset=train_dataset,         # training dataset
+    eval_dataset=val_dataset             # evaluation dataset
+)
+
+trainer.train()
+
+
+
+# from torch.utils.data import DataLoader
+# from torch.optim import AdamW
+
+# device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+# model.to(device)
+# model.train()
+
+# train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+# valid_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
+
+# optim = AdamW(model.parameters(), lr=5e-5)
+
+# for epoch in range(3):
+#     for batch in train_loader:
+#         print("batch", batch)
+#         optim.zero_grad()
+#         input_ids = batch['input_ids'].to(device)
+#         attention_mask = batch['attention_mask'].to(device)
+#         labels = batch['labels'].to(device)
+#         # labels = torch.unsqueeze(labels, 1)
+#         print("input_ids", len(input_ids), input_ids.shape)
+#         print("labels", len(labels), labels.shape)
+#         print("attention_mask", len(attention_mask), attention_mask.shape)
+#         outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+#         loss = outputs[0]
+#         loss.backward()
+#         optim.step()
+
+# model.eval()
 
 
 

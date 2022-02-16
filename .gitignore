@@ -1,1 +1,3 @@
 searchResults.json
+paragraphs_chunked*
+training_BERT/logs/*
