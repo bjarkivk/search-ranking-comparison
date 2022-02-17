@@ -41,11 +41,11 @@ neg_paragraphs = []
 neg_labels = []
 for i in range(neg_count):
     random_index = randrange(neg_count)
-    # Find a random paragraph that is paired with another query than its correct query
+    # Find a random query that is paired with another paragraph than its correct paragraph
     while (queries[random_index].partition(' ')[0] == queries[i].partition(' ')[0]): # find new pair if first word of query is the same
         random_index = randrange(neg_count)
-    neg_queries.append(queries[i])
-    neg_paragraphs.append(paragraphs[random_index])
+    neg_queries.append(queries[random_index])
+    neg_paragraphs.append(paragraphs[i])
     neg_labels.append(0) # these are all negative examples, that is these paragraphs are not relevant to the query
 
 
