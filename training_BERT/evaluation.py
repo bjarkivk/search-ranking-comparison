@@ -33,7 +33,7 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-paragraphsfile = open('paragraphs_chunked_1_mini.json', 'r')
+paragraphsfile = open('paragraphs_chunked_2_mini.json', 'r')
 lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
