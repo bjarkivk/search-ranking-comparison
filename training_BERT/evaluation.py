@@ -90,8 +90,22 @@ train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set
 
 # Evaluation
 
-# saved_model = torch.load('model_B_10k')
+saved_model = torch.load('model_B_10k')
 
+training_args = TrainingArguments(
+    output_dir='./output',          # output directory
+    num_train_epochs=3,              # total number of training epochs
+    per_device_train_batch_size=64,  # batch size per device during training
+    per_device_eval_batch_size=64,   # batch size for evaluation
+    warmup_steps=500,                # number of warmup steps for learning rate scheduler
+    weight_decay=0.01,               # strength of weight decay
+    logging_dir='./logs',            # directory for storing logs
+    logging_steps=10,
+    optim='adamw_torch',
+    # seed=0,
+    # evaluation_strategy="steps",
+    # load_best_model_at_end=True,
+)
 
 trainer = Trainer(
     model=saved_model,                   # the instantiated 🤗 Transformers model to be trained
