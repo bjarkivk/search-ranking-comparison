@@ -114,5 +114,6 @@ trainer = Trainer(
     eval_dataset=val_dataset,            # evaluation dataset
 )
 
-trainer.evaluate()
+metrics=trainer.evaluate()
+print(metrics)
 
