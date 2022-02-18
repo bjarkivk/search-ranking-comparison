@@ -5,6 +5,9 @@ from transformers import TrainingArguments, Trainer
 import datasets
 import torch
 import torch.utils.data as data
+import numpy as np
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
+
 class WikiDataset(torch.utils.data.Dataset):
     def __init__(self, encodings, labels):
         self.encodings = encodings
@@ -37,7 +40,7 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-paragraphsfile = open('../training_BERT/paragraphs_chunked_1_mini.json', 'r')
+paragraphsfile = open('paragraphs_chunked_1_mini.json', 'r')
 lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
@@ -65,11 +68,11 @@ neg_paragraphs = []
 neg_labels = []
 for i in range(neg_count):
     random_index = randrange(neg_count)
-    # Find a random query that is paired with another paragraph than its correct paragraph
-    while (queries[random_index].partition(' ')[0] == queries[i].partition(' ')[0]): # find new pair if first word of query is the same
+    # Find a random paragraph that is paired with another query than its correct query
+    while (queries[random_index] == queries[i]): 
         random_index = randrange(neg_count)
-    neg_queries.append(queries[random_index])
-    neg_paragraphs.append(paragraphs[i])
+    neg_queries.append(queries[i])
+    neg_paragraphs.append(paragraphs[random_index])
     neg_labels.append(0) # these are all negative examples, that is these paragraphs are not relevant to the query
 
 
@@ -123,16 +126,28 @@ train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set
 
 # Training
 
+# def compute_metrics(p):    
+#     pred, labels = p
+#     pred = np.argmax(pred, axis=1)
+#     accuracy = accuracy_score(y_true=labels, y_pred=pred)
+#     recall = recall_score(y_true=labels, y_pred=pred)
+#     precision = precision_score(y_true=labels, y_pred=pred)
+#     f1 = f1_score(y_true=labels, y_pred=pred)
+#     return {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
+
 training_args = TrainingArguments(
-    output_dir='./results',          # output directory
+    output_dir='./output',          # output directory
     num_train_epochs=3,              # total number of training epochs
-    # per_device_train_batch_size=16,  # batch size per device during training
-    # per_device_eval_batch_size=64,   # batch size for evaluation
+    per_device_train_batch_size=64,  # batch size per device during training
+    per_device_eval_batch_size=64,   # batch size for evaluation
     warmup_steps=500,                # number of warmup steps for learning rate scheduler
     weight_decay=0.01,               # strength of weight decay
     logging_dir='./logs',            # directory for storing logs
     logging_steps=10,
     optim='adamw_torch',
+    # seed=0,
+    # evaluation_strategy="steps",
+    # load_best_model_at_end=True,
 )
 
 
@@ -140,12 +155,30 @@ trainer = Trainer(
     model=model,                         # the instantiated 🤗 Transformers model to be trained
     args=training_args,                  # training arguments, defined above
     train_dataset=train_dataset,         # training dataset
-    eval_dataset=val_dataset             # evaluation dataset
+    eval_dataset=val_dataset,           # evaluation dataset
+    # compute_metrics=compute_metrics,
 )
 
 trainer.train()
 
+trainer.evaluate()
 
+
+torch.save(model, 'model_B_10k')
+
+
+saved_model = torch.load('model_B_10k')
+
+
+trainer = Trainer(
+    model=saved_model,                         # the instantiated 🤗 Transformers model to be trained
+    args=training_args,                  # training arguments, defined above
+    train_dataset=train_dataset,         # training dataset
+    eval_dataset=val_dataset,           # evaluation dataset
+    # compute_metrics=compute_metrics,
+)
+
+trainer.evaluate()
 
 # from torch.utils.data import DataLoader
 # from torch.optim import AdamW
