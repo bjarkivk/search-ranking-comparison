@@ -7,7 +7,8 @@ import torch
 import torch.utils.data as data
 import numpy as np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from kb_bert_training import WikiDataset
+from training_BERT.kb_bert_training import WikiDataset
+
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
@@ -76,7 +77,7 @@ train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set
 
 
 
-# Evaluation
+# Predict
 
 # saved_model = torch.load('model_B_10k')
 saved_model = torch.load('model_B_10k',map_location ='cpu') # When we only have cpu
@@ -103,6 +104,6 @@ trainer = Trainer(
     eval_dataset=val_dataset,            # evaluation dataset
 )
 
-metrics=trainer.evaluate()
-print(metrics)
+predictions = trainer.predict(val_dataset)
+print(predictions.predictions.shape, predictions.label_ids.shape)
 
