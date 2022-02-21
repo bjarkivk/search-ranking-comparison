@@ -7,7 +7,7 @@ import torch
 import torch.utils.data as data
 import numpy as np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from kb_bert_training import WikiDataset
+from WikiDataset import WikiDataset
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")

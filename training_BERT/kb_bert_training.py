@@ -7,19 +7,7 @@ import torch
 import torch.utils.data as data
 import numpy as np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-
-class WikiDataset(torch.utils.data.Dataset):
-    def __init__(self, encodings, labels):
-        self.encodings = encodings
-        self.labels = labels
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx])
-        return item
-
-    def __len__(self):
-        return len(self.labels)
+from WikiDataset import WikiDataset
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
