@@ -1,5 +1,6 @@
-BM25_SearchResults.json
-Re_ranked_SearchResults.json
+bm25_search_results.json
+re_ranked_search_results.json
+ground_truth_search_results.json
 paragraphs_chunked*
 training_BERT/logs/*
 model_*
