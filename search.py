@@ -267,7 +267,7 @@ for i in range(rank_p):
     fraction_IDCG = relevance_i_IDCG/np.log2(i+1+1)
     IDCG += fraction_IDCG 
     IDCG_list.append(IDCG)
-    print(IDCG,relevance_i_IDCG, fraction_IDCG)
+    print(relevance_i_IDCG, IDCG, fraction_IDCG)
 
 print()
 print("DCG_BM25 calculations")
@@ -280,7 +280,7 @@ for i in range(rank_p):
     DCG_BM25 += fraction_DCG_BM25 
     DCG_BM25_list.append(DCG_BM25)
     NDCG_BM25_list.append(DCG_BM25_list[i]/IDCG_list[i])
-    print(DCG_BM25, relevance_i_DCG_BM25, fraction_DCG_BM25)
+    print(relevance_i_DCG_BM25, DCG_BM25, fraction_DCG_BM25)
 
 
 print()
@@ -295,7 +295,7 @@ for i in range(rank_p):
     DCG_re_rank_list.append(DCG_re_rank)
 
     NDCG_re_rank_list.append(DCG_re_rank_list[i]/IDCG_list[i])
-    print(DCG_re_rank, relevance_i_DCG_re_rank, fraction_DCG_re_rank)
+    print(relevance_i_DCG_re_rank, DCG_re_rank, fraction_DCG_re_rank)
 
 
 
