@@ -70,16 +70,17 @@ def get_BERT_scores(query, top10_hits):
 
 
 def bert_re_ranking(top10, bert_scores):
-    # print('bert_scores', bert_scores)
-    # print('top10')
-    # for x in top10:
-    #     print(x['_score'])
-    combined_score = [ value['_score']+ bert_scores[index] for index, value in enumerate(top10) ]
-    # print('combined_score', combined_score)
+    print('bert_scores', bert_scores)
+    print('top10')
+    for x in top10:
+        print(x['_score'])
+    lowest_score_in_top10 = top10[9]['_score']
+    new_score = [ lowest_score_in_top10 + bert_scores[index] for index, value in enumerate(top10) ]
+    # print('new_score', new_score)
     top10_with_new_scores =  []
     for index, x in enumerate(top10):
         item = x
-        item['_score'] = combined_score[index]
+        item['_score'] = new_score[index]
         top10_with_new_scores.append(item)
     
     # print('top10_with_added_score', top10_with_new_scores)
@@ -259,7 +260,10 @@ score_dict = get_ground_truth_score_dict(ground_truth_json)
 print("IDCG calculations")
 # IDCG calculations
 for i in range(rank_p):
-    relevance_i_IDCG = ground_truth_json["hits"]["hits"][i]["_score"]
+    # set relevance to zero if we dont have enough results in ground truth
+    relevance_i_IDCG = 0.0
+    if(i < len(ground_truth_json["hits"]["hits"])):
+        relevance_i_IDCG = ground_truth_json["hits"]["hits"][i]["_score"]
     fraction_IDCG = relevance_i_IDCG/np.log2(i+1+1)
     IDCG += fraction_IDCG 
     IDCG_list.append(IDCG)
