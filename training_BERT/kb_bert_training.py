@@ -134,7 +134,7 @@ training_args = TrainingArguments(
     logging_steps=10,
     optim='adamw_torch',
     # seed=0,
-    # evaluation_strategy="steps",
+    evaluation_strategy="steps",
     # load_best_model_at_end=True,
 )
 
@@ -149,7 +149,8 @@ trainer = Trainer(
 
 trainer.train()
 
-trainer.evaluate()
+metrics=trainer.evaluate()
+print(metrics)
 
 
 torch.save(model, 'model_C_3_test')
@@ -166,7 +167,8 @@ trainer = Trainer(
     # compute_metrics=compute_metrics,
 )
 
-trainer.evaluate()
+metrics2=trainer.evaluate()
+print(metrics2)
 
 # from torch.utils.data import DataLoader
 # from torch.optim import AdamW
