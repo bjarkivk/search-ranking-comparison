@@ -28,7 +28,7 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-paragraphsfile = open('paragraphs_chunked_1and2.json', 'r')
+paragraphsfile = open('paragraphs_chunked_1_100k.json', 'r')
 lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
@@ -64,7 +64,7 @@ for i in range(neg_count):
     neg_paragraphs.append(paragraphs[i])
     neg_labels.append(0) # these are all negative examples, that is these paragraphs are not relevant to the query
     if(i % 5000 == 0):
-        print("negative examples:", index)
+        print("negative examples:", i)
 
 
 # print("Negative")
@@ -75,6 +75,8 @@ for i in range(neg_count):
 queries.extend(neg_queries)
 paragraphs.extend(neg_paragraphs)
 labels.extend(neg_labels)
+
+print("Pos and Neg examples ready.")
 
 # print("Both")
 # print(len(queries), queries)
@@ -87,6 +89,8 @@ labels.extend(neg_labels)
 # Will pad the sequences up to the model max length
 model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
 # model_inputs = tokenizer(queries, paragraphs)
+
+print("Tokenization finished.")
 
 # print(model_inputs)
 
@@ -105,6 +109,8 @@ dataset = WikiDataset(model_inputs, labels)
 train_set_size = int(len(dataset) * 0.95)
 val_set_size = len(dataset) - train_set_size
 train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
+
+print("Training and Valuation datasets ready.")
 # print("val_dataset", val_dataset.dataset)
 # print("val_dataset", val_dataset.indices)
 # print(len(val_dataset))
@@ -153,10 +159,10 @@ trainer.train()
 
 
 
-torch.save(model, 'model_D_500k')
+torch.save(model, 'model_D_100k')
 
 
-saved_model = torch.load('model_D_500k')
+saved_model = torch.load('model_D_100k')
 
 
 trainer = Trainer(
