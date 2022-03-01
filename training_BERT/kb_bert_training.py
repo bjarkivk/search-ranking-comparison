@@ -41,7 +41,8 @@ for index, line in enumerate(lines):
         queries.append(query)
         paragraphs.append(y["paragraph"])
         labels.append(1) # these are all positive examples, that is these paragraphs are relevant to the query
-
+    if(index % 5000):
+        print("positive examples:", index)
 pos_count = len(queries)
 
 # print("Positive")
@@ -62,6 +63,8 @@ for i in range(neg_count):
     neg_queries.append(queries[random_index])
     neg_paragraphs.append(paragraphs[i])
     neg_labels.append(0) # these are all negative examples, that is these paragraphs are not relevant to the query
+    if(index % 5000):
+        print("negative examples:", index)
 
 
 # print("Negative")
