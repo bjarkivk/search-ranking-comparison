@@ -9,7 +9,7 @@ import numpy as np
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-model = torch.load('model_B_10k',map_location ='cpu') # When we only have cpu
+model = torch.load('model_D_100k',map_location ='cpu') # When we only have cpu
 
 
 

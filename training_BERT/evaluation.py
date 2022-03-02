@@ -68,7 +68,7 @@ model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', paddin
 dataset = WikiDataset(model_inputs, labels)
 
 
-train_set_size = int(len(dataset) * 0.999)
+train_set_size = int(len(dataset) * 0.80)
 val_set_size = len(dataset) - train_set_size
 train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
 
