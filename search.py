@@ -45,7 +45,7 @@ def seperate(arg):
 def get_BERT_scores(query, top10_hits):
     # Load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-    model = torch.load('training_BERT/model_B_10k',map_location ='cpu') # When we only have cpu
+    model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
 
     
     queries = [ query for x in range(10) ] # ten times the same query

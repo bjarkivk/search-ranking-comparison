@@ -5,3 +5,4 @@ paragraphs_chunked*
 paragraphs_test*
 training_BERT/logs/*
 model_*
+notes_search.txt
