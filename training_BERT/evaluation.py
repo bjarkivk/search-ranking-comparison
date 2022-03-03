@@ -8,10 +8,12 @@ import torch.utils.data as data
 import numpy as np
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 from WikiDataset import WikiDataset
+import time
+start = time.time()
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-model = AutoModelForSequenceClassification.from_pretrained("KB/bert-base-swedish-cased")
+model = torch.load('model_D_100k',map_location ='cpu') # When we only have cpu
 
 queries = []
 paragraphs = []
@@ -21,7 +23,7 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-paragraphsfile = open('paragraphs_chunked_2_mini.json', 'r')
+paragraphsfile = open('paragraphs_test2.json', 'r')
 lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
@@ -61,48 +63,73 @@ labels.extend(neg_labels)
 
 
 # Will pad the sequences up to the model max length
-model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
+model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512, return_tensors="pt")
 
 
 
-dataset = WikiDataset(model_inputs, labels)
-
-
-train_set_size = int(len(dataset) * 0.80)
-val_set_size = len(dataset) - train_set_size
-train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
+# dataset = WikiDataset(model_inputs, labels)
 
 
 
 
 
-# Evaluation
+# forward pass
+outputs = model(**model_inputs)
+predictions = outputs.logits.argmax(-1)
+print(model_inputs)
+print("outputs", outputs)
+print("predictions", predictions)
+print(outputs.logits.softmax(dim=-1).tolist())
 
-# saved_model = torch.load('model_B_10k')
-saved_model = torch.load('model_B_10k',map_location ='cpu') # When we only have cpu
+correct_pred = 0
+pred = predictions.tolist()
+print(pred, type(pred))
+print(labels, type(labels))
+for i, value in enumerate(pred):
+    if (value == labels[i]):
+        correct_pred += 1
+print("correct_pred", correct_pred)
+print("percentage", correct_pred/len(pred))
 
-training_args = TrainingArguments(
-    output_dir='./output',          # output directory
-    num_train_epochs=3,              # total number of training epochs
-    per_device_train_batch_size=64,  # batch size per device during training
-    per_device_eval_batch_size=64,   # batch size for evaluation
-    warmup_steps=500,                # number of warmup steps for learning rate scheduler
-    weight_decay=0.01,               # strength of weight decay
-    logging_dir='./logs',            # directory for storing logs
-    logging_steps=10,
-    optim='adamw_torch',
-    # seed=0,
-    # evaluation_strategy="steps",
-    # load_best_model_at_end=True,
-)
+end = time.time()
+print("time elapsed", end - start)
 
-trainer = Trainer(
-    model=saved_model,                   # the instantiated 🤗 Transformers model to be trained
-    args=training_args,                  # training arguments, defined above
-    train_dataset=train_dataset,         # training dataset
-    eval_dataset=val_dataset,            # evaluation dataset
-)
 
-metrics=trainer.evaluate()
-print(metrics)
+# train_set_size = int(len(dataset) * 0.80)
+# val_set_size = len(dataset) - train_set_size
+# train_dataset, val_dataset = data.random_split(dataset, [train_set_size, val_set_size], generator=torch.Generator().manual_seed(42))
+
+
+
+
+
+# # Evaluation
+
+# # saved_model = torch.load('model_B_10k')
+# saved_model = torch.load('model_B_10k',map_location ='cpu') # When we only have cpu
+
+# training_args = TrainingArguments(
+#     output_dir='./output',          # output directory
+#     num_train_epochs=3,              # total number of training epochs
+#     per_device_train_batch_size=64,  # batch size per device during training
+#     per_device_eval_batch_size=64,   # batch size for evaluation
+#     warmup_steps=500,                # number of warmup steps for learning rate scheduler
+#     weight_decay=0.01,               # strength of weight decay
+#     logging_dir='./logs',            # directory for storing logs
+#     logging_steps=10,
+#     optim='adamw_torch',
+#     # seed=0,
+#     # evaluation_strategy="steps",
+#     # load_best_model_at_end=True,
+# )
+
+# trainer = Trainer(
+#     model=saved_model,                   # the instantiated 🤗 Transformers model to be trained
+#     args=training_args,                  # training arguments, defined above
+#     train_dataset=train_dataset,         # training dataset
+#     eval_dataset=val_dataset,            # evaluation dataset
+# )
+
+# metrics=trainer.evaluate()
+# print(metrics)
 
