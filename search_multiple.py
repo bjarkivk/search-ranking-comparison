@@ -285,8 +285,7 @@ lines = paragraphsfile.readlines()
 
 queries = []
 
-# Create positive examples (label = 1)
-# Create positive examples (label = 1)
+# Read every line and create test queries for every paragraph
 for index, line in enumerate(lines):
     line = line.replace('\n', '')
     if(line != '{"index":{}}'): # We discard the empty lines
@@ -297,15 +296,16 @@ for index, line in enumerate(lines):
 
 
 # random.seed(10)
-# sampled_list = random.sample(queries, 5)
+random.seed(11)
 
-y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
-sampled_list = [("Småvar", y)]
+# Sample from the test queries
+sampled_list = random.sample(queries, 100)
 
+# y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
+# sampled_list = [("Småvar", y)]
 # print("sampled_list",sampled_list)
 
 results_list = []
-
 
 for i, query_tuple in enumerate(sampled_list):
     print(i+1, "/", len(sampled_list), "Query:", query_tuple[0])
