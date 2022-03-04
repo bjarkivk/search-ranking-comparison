@@ -1,6 +1,7 @@
 import random
 import json
 import requests
+import time
 import sys
 import os
 import torch
@@ -30,8 +31,7 @@ def get_BERT_scores(query, top10_hits):
     tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
     model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
 
-    
-    queries = [ query for x in range(10) ] # ten times the same query
+    queries = [ query for x in range(len(top10_hits)) ] # As many queries as there are many hits, could be less than 10
     paragraphs = [ i['_source']['paragraph'] for i in top10_hits ] # paragraphs of the top 10 hits
  
     model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512, return_tensors="pt")
@@ -57,7 +57,7 @@ def bert_re_ranking(top10, bert_scores):
     # print('top10')
     # for x in top10:
     #     print(x['_score'])
-    lowest_score_in_top10 = top10[9]['_score']
+    lowest_score_in_top10 = top10[-1]['_score']
     new_score = [ lowest_score_in_top10 + bert_scores[index] for index, value in enumerate(top10) ]
     # print('new_score', new_score)
     top10_with_new_scores =  []
@@ -240,8 +240,10 @@ def one_search(query_tuple):
 
     # DCG_BM25 calculations
     for i in range(rank_p):
-        bm25_id = bm_25_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
-        bm25_score = score_dict.get(bm25_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
+        bm25_score = 0.0 # give the score zero as a placeholder if BM25 had less than rank_p results
+        if (i <= len(bm_25_json["hits"]["hits"]) - 1):
+            bm25_id = bm_25_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
+            bm25_score = score_dict.get(bm25_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
         relevance_i_DCG_BM25 = bm25_score
         fraction_DCG_BM25 = relevance_i_DCG_BM25/np.log2(i+1+1)
 
@@ -254,8 +256,10 @@ def one_search(query_tuple):
 
     # DCG_re_rank calculations
     for i in range(rank_p):
-        re_rank_id = re_ranked_results_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
-        re_rank_score = score_dict.get(re_rank_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
+        re_rank_score = 0.0 # give the score zero as a placeholder if BM25 had less than rank_p results
+        if (i <= len(re_ranked_results_json["hits"]["hits"]) - 1):
+            re_rank_id = re_ranked_results_json["hits"]["hits"][i]["_id"] # get id of i-th search result in re-ranked results
+            re_rank_score = score_dict.get(re_rank_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
         relevance_i_DCG_re_rank = re_rank_score
         fraction_DCG_re_rank = relevance_i_DCG_re_rank/np.log2(i+1+1)
 
@@ -272,8 +276,8 @@ def one_search(query_tuple):
     ##########################################################################
 
 
-
-
+# Timekeeper
+start = time.time()
 
 # Read from json bulk upload file
 paragraphsfile = open('training_BERT/paragraphs_chunked_4.json', 'r')
@@ -292,51 +296,77 @@ for index, line in enumerate(lines):
         queries.append((query, y))
 
 
-random.seed(10)
-sampled_list = random.sample(queries, 2)
-print("sampled_list",sampled_list)
+# random.seed(10)
+# sampled_list = random.sample(queries, 5)
 
-# TODO: do multiple searches and collect results into a list
+y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
+sampled_list = [("Småvar", y)]
+
+# print("sampled_list",sampled_list)
 
 results_list = []
 
-for query_tuple in sampled_list:
+
+for i, query_tuple in enumerate(sampled_list):
+    print(i+1, "/", len(sampled_list), "Query:", query_tuple[0])
     res = one_search(query_tuple)
     results_list.append(res)
 
 
+bm25_wins = 0
+re_rank_wins = 0
+draws = 0
+
 for j in results_list:
-    print()
-    print("ground_truth_relevance_list")
-    [print(i) for i in j.ground_truth_relevance_list]
+    print(j.NDCG_BM25_list[-1], j.NDCG_re_rank_list[-1], "Query:", j.query)
+    if j.NDCG_BM25_list[-1] > j.NDCG_re_rank_list[-1]:
+        bm25_wins += 1
+    elif j.NDCG_BM25_list[-1] < j.NDCG_re_rank_list[-1]:
+        re_rank_wins += 1
+    else:
+        draws += 1
 
-    print()
-    print("BM25_relevance_list")
-    [print(i) for i in j.BM25_relevance_list]
+    # print()
+    # print("ground_truth_relevance_list")
+    # [print(i) for i in j.ground_truth_relevance_list]
 
-    print()
-    print("re_rank_relevance_list")
-    [print(i) for i in j.re_rank_relevance_list]
+    # print()
+    # print("BM25_relevance_list")
+    # [print(i) for i in j.BM25_relevance_list]
 
-    print()
-    print("IDCG_list")
-    [print(i) for i in j.IDCG_list]
+    # print()
+    # print("re_rank_relevance_list")
+    # [print(i) for i in j.re_rank_relevance_list]
 
-    print()
-    print("DCG_BM25_list")
-    [print(i) for i in j.DCG_BM25_list]
+    # print()
+    # print("IDCG_list")
+    # [print(i) for i in j.IDCG_list]
 
-    print()
-    print("DCG_re_rank_list")
-    [print(i) for i in j.DCG_re_rank_list]
+    # print()
+    # print("DCG_BM25_list")
+    # [print(i) for i in j.DCG_BM25_list]
 
-    print()
-    print("NDCG_BM25_list")
-    [print(i) for i in j.NDCG_BM25_list]
+    # print()
+    # print("DCG_re_rank_list")
+    # [print(i) for i in j.DCG_re_rank_list]
 
-    print()
-    print("NDCG_re_rank_list")
-    [print(i) for i in j.NDCG_re_rank_list]
+    # print()
+    # print("NDCG_BM25_list")
+    # [print(i) for i in j.NDCG_BM25_list]
+
+    # print()
+    # print("NDCG_re_rank_list")
+    # [print(i) for i in j.NDCG_re_rank_list]
+
+
+print("bm25_wins", bm25_wins)
+print("re_rank_wins", re_rank_wins)
+print("draws", draws)
+
+end = time.time()
+print("Time elapsed:", end - start)
+
+
 
 
 

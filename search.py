@@ -48,7 +48,7 @@ def get_BERT_scores(query, top10_hits):
     model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
 
     
-    queries = [ query for x in range(10) ] # ten times the same query
+    queries = [ query for x in range(len(top10_hits)) ] # As many queries as there are many hits, could be less than 10
     paragraphs = [ i['_source']['paragraph'] for i in top10_hits ] # paragraphs of the top 10 hits
  
     model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512, return_tensors="pt")
@@ -70,11 +70,11 @@ def get_BERT_scores(query, top10_hits):
 
 
 def bert_re_ranking(top10, bert_scores):
-    print('bert_scores', bert_scores)
-    print('top10')
-    for x in top10:
-        print(x['_score'])
-    lowest_score_in_top10 = top10[9]['_score']
+    # print('bert_scores', bert_scores)
+    # print('top10')
+    # for x in top10:
+    #     print(x['_score'])
+    lowest_score_in_top10 = top10[-1]['_score']
     new_score = [ lowest_score_in_top10 + bert_scores[index] for index, value in enumerate(top10) ]
     # print('new_score', new_score)
     top10_with_new_scores =  []
@@ -273,8 +273,10 @@ print()
 print("DCG_BM25 calculations")
 # DCG_BM25 calculations
 for i in range(rank_p):
-    bm25_id = bm_25_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
-    bm25_score = score_dict.get(bm25_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
+    bm25_score = 0.0 # give the score zero as a placeholder if BM25 had less than rank_p results
+    if (i <= len(bm_25_json["hits"]["hits"]) - 1):
+        bm25_id = bm_25_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
+        bm25_score = score_dict.get(bm25_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
     relevance_i_DCG_BM25 = bm25_score
     fraction_DCG_BM25 = relevance_i_DCG_BM25/np.log2(i+1+1)
     DCG_BM25 += fraction_DCG_BM25 
@@ -287,8 +289,10 @@ print()
 print("DCG_re_rank calculations")
 # DCG_re_rank calculations
 for i in range(rank_p):
-    re_rank_id = re_ranked_results_json["hits"]["hits"][i]["_id"] # get id of i-th search result in bm25
-    re_rank_score = score_dict.get(re_rank_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
+    re_rank_score = 0.0 # give the score zero as a placeholder if BM25 had less than rank_p results
+    if (i <= len(re_ranked_results_json["hits"]["hits"]) - 1):
+        re_rank_id = re_ranked_results_json["hits"]["hits"][i]["_id"] # get id of i-th search result in re-ranked results
+        re_rank_score = score_dict.get(re_rank_id, 0.0) # get score of i-th search result in bm25, if it doesn't exist it is zero
     relevance_i_DCG_re_rank = re_rank_score
     fraction_DCG_re_rank = relevance_i_DCG_re_rank/np.log2(i+1+1)
     DCG_re_rank += fraction_DCG_re_rank
