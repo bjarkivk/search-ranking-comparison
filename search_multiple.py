@@ -83,13 +83,12 @@ def get_ground_truth_score_dict(ground_truth_json):
     return score_dict
 
 # Do one search query_tuple is (query with spaces, query as json object)
-def one_search(query_tuple):
+def one_search(query, json_obj):
 
     ### BM25 search ###
 
-    searchArray = get_searchArray(query_tuple[1])
+    searchArray = get_searchArray(json_obj)
     space = " "
-    query = query_tuple[0]
 
     payload = json.dumps({
         "size": 1000,
@@ -283,23 +282,27 @@ start = time.time()
 paragraphsfile = open('training_BERT/paragraphs_chunked_4.json', 'r')
 lines = paragraphsfile.readlines()
 
-queries = []
+queries = {}
 
-# Read every line and create test queries for every paragraph
+# Read every line and create test queries for every unique query
 for index, line in enumerate(lines):
     line = line.replace('\n', '')
     if(line != '{"index":{}}'): # We discard the empty lines
         y = json.loads(line)
         q = y["id1"] + " " + y["id2"] + " " + y["id3"] + " " + y["id4"] + " " + y["id5"] # Create a query that is all ids concatinated together with space between
         query = q.strip() # Remove spaces at the end
-        queries.append((query, y))
+        queries[query] = y
+
+print("All queries", len(lines)/2)
+print("Unique queries", len(queries))
+
 
 
 # random.seed(10)
-random.seed(11)
+random.seed(12)
 
 # Sample from the test queries
-sampled_list = random.sample(queries, 100)
+sampled_keys = random.sample(list(queries), 2)
 
 # y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
 # sampled_list = [("Småvar", y)]
@@ -307,9 +310,9 @@ sampled_list = random.sample(queries, 100)
 
 results_list = []
 
-for i, query_tuple in enumerate(sampled_list):
-    print(i+1, "/", len(sampled_list), "Query:", query_tuple[0])
-    res = one_search(query_tuple)
+for i, query in enumerate(sampled_keys):
+    print(i+1, "/", len(sampled_keys), "Query:", query)
+    res = one_search(query,queries[query])
     results_list.append(res)
 
 
