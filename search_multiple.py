@@ -119,11 +119,13 @@ def one_search(query, json_obj):
     top10 = hits[:10]
     rest = hits[10:]
 
-    bert_scores = get_BERT_scores(query, top10)
-    re_ranked_results_top10 = bert_re_ranking(top10, bert_scores)
+    # if there are no search results, return empty list
+    all_hits = []
+    if len(top10) != 0:    
+        bert_scores = get_BERT_scores(query, top10)
+        re_ranked_results_top10 = bert_re_ranking(top10, bert_scores)
+        all_hits = re_ranked_results_top10 + rest
 
-
-    all_hits = re_ranked_results_top10 + rest
     re_ranked_results_json['hits']['hits'] = all_hits
 
     ########################
@@ -302,7 +304,7 @@ print("Unique queries", len(queries))
 random.seed(12)
 
 # Sample from the test queries
-sampled_keys = random.sample(list(queries), 2)
+sampled_keys = random.sample(list(queries), 100)
 
 # y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
 # sampled_list = [("Småvar", y)]

@@ -144,11 +144,13 @@ hits = bm25_results_json['hits']['hits']
 top10 = hits[:10]
 rest = hits[10:]
 
-bert_scores = get_BERT_scores(query, top10)
-re_ranked_results_top10 = bert_re_ranking(top10, bert_scores)
+# if there are no search results, return empty list
+all_hits = []
+if len(top10) != 0:    
+    bert_scores = get_BERT_scores(query, top10)
+    re_ranked_results_top10 = bert_re_ranking(top10, bert_scores)
+    all_hits = re_ranked_results_top10 + rest
 
-
-all_hits = re_ranked_results_top10 + rest
 re_ranked_results_json['hits']['hits'] = all_hits
 re_ranked_results = json.dumps(re_ranked_results_json, ensure_ascii=False)
 re_ranked_writeToFile(re_ranked_results)
