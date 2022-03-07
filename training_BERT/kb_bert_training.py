@@ -28,7 +28,7 @@ labels = []
 
 # Real Dataset, read from paragraphs.json bulk upload file
 # Open the list of articles to read
-paragraphsfile = open('paragraphs_chunked_1and2_400k.json', 'r')
+paragraphsfile = open('paragraphs_chunked_1_200k.json', 'r')
 lines = paragraphsfile.readlines()
 
 # Create positive examples (label = 1)
@@ -159,10 +159,10 @@ trainer.train()
 
 
 
-torch.save(model, 'model_E_400k')
+torch.save(model, 'model_F_200k')
 
 
-saved_model = torch.load('model_E_400k')
+saved_model = torch.load('model_F_200k')
 
 
 trainer = Trainer(

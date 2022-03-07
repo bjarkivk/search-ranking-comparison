@@ -301,10 +301,10 @@ print("Unique queries", len(queries))
 
 
 # random.seed(10)
-random.seed(12)
+random.seed(14)
 
 # Sample from the test queries
-sampled_keys = random.sample(list(queries), 100)
+sampled_keys = random.sample(list(queries), 3)
 
 # y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
 # sampled_list = [("Småvar", y)]
