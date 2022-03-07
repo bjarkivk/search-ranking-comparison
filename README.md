@@ -15,19 +15,25 @@ Now you have:
 
 You will need a paragraphs file on the form of the `paragraphs.json` file from bjarkivk/Eva
 Then you can train a BERT model with:
+
 `$ python kb_bert_training.py`
 
 This saves a model to a file.
+
 You can load the models you have trained when you search with `search.py` and `search_multiple.py`.
+
 The model is defined in the beginning of `search.py` and `search_multiple.py`.
 
 ## Doing a single search
 
 To do a single search:
+
 `$ python search.py "[Thomasgymnasiet/Historia]"`
 
 ## Doing multiple searches
 
 To do multiple searches sampled from the json file specified as `paragraphsfile` in the `search_multiple.py` file, do:
+
 `$ python search_multiple.py 10`
+
 The argument value indicates how many searches are done.
