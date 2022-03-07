@@ -7,7 +7,9 @@ from transformers import AutoTokenizer
 import numpy as np
 from operator import itemgetter
 
-
+# Load tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
+model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
 
 ### Functions ###
 
@@ -43,11 +45,6 @@ def seperate(arg):
 
 
 def get_BERT_scores(query, top10_hits):
-    # Load tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-    model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
-
-    
     queries = [ query for x in range(len(top10_hits)) ] # As many queries as there are many hits, could be less than 10
     paragraphs = [ i['_source']['paragraph'] for i in top10_hits ] # paragraphs of the top 10 hits
  

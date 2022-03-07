@@ -1,3 +1,6 @@
+
+### A class that contains data about a search result ###
+
 class SearchResult:
   def __init__(self, query):
     self.query = query

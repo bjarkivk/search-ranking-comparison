@@ -6,6 +6,7 @@ import torch
 import torch.utils.data as data
 import numpy as np
 
+### File for doing a simple prediction ###
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")

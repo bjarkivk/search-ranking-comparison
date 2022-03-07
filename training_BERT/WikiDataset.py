@@ -1,5 +1,6 @@
 import torch
 
+### A Dataset class for the Wikipedia data ###
 
 class WikiDataset(torch.utils.data.Dataset):
     def __init__(self, encodings, labels):

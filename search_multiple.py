@@ -10,6 +10,10 @@ import numpy as np
 from operator import itemgetter
 from SearchResult import SearchResult
 
+# Load tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
+model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
+
 ####### Does multiple searches                   ###########
 ####### Compares the BM25 to the BERT re-ranker  ########
 
@@ -27,10 +31,6 @@ def get_searchArray(obj):
 
 
 def get_BERT_scores(query, top10_hits):
-    # Load tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
-    model = torch.load('training_BERT/model_D_100k',map_location ='cpu') # When we only have cpu
-
     queries = [ query for x in range(len(top10_hits)) ] # As many queries as there are many hits, could be less than 10
     paragraphs = [ i['_source']['paragraph'] for i in top10_hits ] # paragraphs of the top 10 hits
  
@@ -277,6 +277,9 @@ def one_search(query, json_obj):
     ##########################################################################
 
 
+
+### Start of code ###
+
 # Timekeeper
 start = time.time()
 
@@ -303,8 +306,8 @@ print("Unique queries", len(queries))
 # random.seed(10)
 random.seed(14)
 
-# Sample from the test queries
-sampled_keys = random.sample(list(queries), 3)
+# Sample from the test queries, quantity of searches defined in argument value
+sampled_keys = random.sample(list(queries), int(sys.argv[1]))
 
 # y = json.loads('{"id1": "Småvar", "id2": "", "id3": "", "id4": "", "id5": "", "paragraph": "Småvar, Zeugopterus norvegicus är en fisk i familjen piggvarar som är Europas minsta plattfisk. Den kallas även småvarv.[2]"}')
 # sampled_list = [("Småvar", y)]
@@ -323,7 +326,7 @@ re_rank_wins = 0
 draws = 0
 
 for j in results_list:
-    print(j.NDCG_BM25_list[-1], j.NDCG_re_rank_list[-1], "Query:", j.query)
+    print("bm25", j.NDCG_BM25_list[-1], "re-ranker", j.NDCG_re_rank_list[-1], "Query:", j.query)
     if j.NDCG_BM25_list[-1] > j.NDCG_re_rank_list[-1]:
         bm25_wins += 1
     elif j.NDCG_BM25_list[-1] < j.NDCG_re_rank_list[-1]:

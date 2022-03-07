@@ -11,6 +11,10 @@ from WikiDataset import WikiDataset
 import time
 start = time.time()
 
+
+### This file was just a test, it was not used ###
+
+
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
 model = torch.load('model_D_100k',map_location ='cpu') # When we only have cpu
