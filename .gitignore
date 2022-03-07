@@ -5,5 +5,5 @@ paragraphs_chunked*
 paragraphs_test*
 training_BERT/logs/*
 model_*
-notes_*
 training_BERT/output/400k_training_failed/*
+notes_*
