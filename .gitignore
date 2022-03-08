@@ -7,3 +7,4 @@ training_BERT/logs/*
 model_*
 training_BERT/output/400k_training_failed/*
 notes_*
+*.csv

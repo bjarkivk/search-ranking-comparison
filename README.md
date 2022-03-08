@@ -39,8 +39,8 @@ Queries are on the form \[title/heading1/heading1.5\]. To do a single search:
 
 ## Doing multiple searches
 
-To do multiple searches with queries sampled from the json file specified as `paragraphsfile` in the `search_multiple.py` file, do:
+To do multiple searches with queries sampled from the json file specified as `PARAGRAPHS_FILE` in the `search_multiple.py` file, do:
 
 `$ python search_multiple.py 10`
 
-This will do 10 searches with randomly sampled queries from the `paragraphsfile`. Do not use the same `paragraphsfile` here as you used in training.
+This will do 10 searches with randomly sampled queries from the `PARAGRAPHS_FILE`. Do not use the same `PARAGRAPHS_FILE` here as you used in training, otherwise there will be a leak from training data to the testing data.

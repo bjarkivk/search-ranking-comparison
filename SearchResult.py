@@ -2,8 +2,9 @@
 ### A class that contains data about a search result ###
 
 class SearchResult:
-  def __init__(self, query):
+  def __init__(self, query, query_level):
     self.query = query
+    self.query_level = query_level # How specific is the query in terms of how many ids are used, can be between 1 to 5
 
     self.IDCG = 0; self.IDCG_list = []  # Ideal Discounted Cumulative Gain, that is Discounted Cumulative Gain for the ground truth
     self.DCG_BM25 = 0; self.DCG_BM25_list = [] # Discounted Cumulative Gain for BM25
