@@ -4,8 +4,9 @@ import pandas as pd
 ### In this file we analyse the search result comparison done with search_multiple.py ###
 
 # Load data from files
-df1 = pd.read_csv('comparison_seed12_5.csv', sep='\t', index_col=0)
-df2 = pd.read_csv('comparison_seed12_3.csv', sep='\t', index_col=0)
+df1 = pd.read_csv('comparison_seed101_200.csv', sep='\t', index_col=0)
+df2 = pd.read_csv('comparison_seed102_200.csv', sep='\t', index_col=0)
+
 
 print(df1)
 print(df2)
@@ -37,10 +38,20 @@ means_by_query_level = main_df.groupby('query_level').mean()
 print("means_by_query_level")
 print(means_by_query_level)
 
+# Find count of samples by query level
 count_by_query_level = main_df.groupby('query_level').size()
 print("count_by_query_level")
 print(count_by_query_level)
 
+# Find which algorithm won the most often
+re_ranker_wins = len(main_df[(main_df['re_ranker_advantage']>0)])
+bm25_wins = len(main_df[(main_df['re_ranker_advantage']<0)])
+draws = len(main_df[(main_df['re_ranker_advantage']==0)])
+print("re_ranker_wins", re_ranker_wins)
+print("bm25_wins", bm25_wins)
+print("draws", draws)
+
+
 # Plot
-# main_df.plot('bm25_NDCG_at_rank_10','re_ranker_NDCG_at_rank_10',kind='scatter', color='red')
-# plt.show()
+main_df.plot('bm25_NDCG_at_rank_10','re_ranker_NDCG_at_rank_10',kind='scatter', color='red')
+plt.show()

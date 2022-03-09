@@ -18,9 +18,9 @@ from SearchResult import SearchResult
 # Important constants that can be changed
 MODEL_FILE = 'training_BERT/model_D_100k'                   # Them model in we use
 PARAGRAPHS_FILE = 'training_BERT/paragraphs_chunked_4.json' # The test set we use
-RESULTS_FILE = 'comparison_seed12_3.csv'                             # Name of the file where the results will appear in
+RESULTS_FILE = 'comparison_seed102_200.csv'                             # Name of the file where the results will appear in
 RANK_P = 10                                                 # How many search results we evaluate, set to 10 because the re-ranker only re-ranks first 10 hits
-random.seed(12)                                             # Random seed for sampling of the queries, can be commented out
+random.seed(102)                                             # Random seed for sampling of the queries, can be commented out
 
 
 # Load tokenizer and model

@@ -1,9 +1,11 @@
 import json
 from random import randrange
+from transformers import AutoTokenizer
 
 
 ### File for testing the tokenizer ###
 
+tokenizer = AutoTokenizer.from_pretrained("KB/bert-base-swedish-cased")
 
 queries = []
 paragraphs = []
@@ -64,3 +66,7 @@ print(len(queries), queries)
 print(len(paragraphs), paragraphs)
 print(len(labels), labels)
 print()
+
+
+model_inputs = tokenizer(queries, paragraphs, truncation='longest_first', padding='max_length', max_length=512)
+print(model_inputs)
