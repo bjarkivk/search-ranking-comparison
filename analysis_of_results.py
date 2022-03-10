@@ -1,19 +1,28 @@
+from turtle import color
 import matplotlib.pyplot as plt
-import pandas as pd  
+import pandas as pd
+import numpy as np
 
 ### In this file we analyse the search result comparison done with search_multiple.py ###
 
 # Load data from files
 df1 = pd.read_csv('comparison_seed101_200.csv', sep='\t', index_col=0)
 df2 = pd.read_csv('comparison_seed102_200.csv', sep='\t', index_col=0)
+df3 = pd.read_csv('comparison_seed103_200.csv', sep='\t', index_col=0)
+df4 = pd.read_csv('comparison_seed104_200.csv', sep='\t', index_col=0)
+df5 = pd.read_csv('comparison_seed105_200.csv', sep='\t', index_col=0)
+df6 = pd.read_csv('comparison_seed106_200.csv', sep='\t', index_col=0)
+df7 = pd.read_csv('comparison_seed107_200.csv', sep='\t', index_col=0)
+df8 = pd.read_csv('comparison_seed108_200.csv', sep='\t', index_col=0)
 
 
-print(df1)
-print(df2)
+
+# print(df1)
+# print(df2)
 
 
 # Combine all dataframes into one
-combined_df = pd.concat([df1, df2], ignore_index=True)
+combined_df = pd.concat([df1, df2, df3, df4, df5, df6, df7, df8], ignore_index=True)
 print(combined_df)
 
 # Remove duplicate values in dataframe
@@ -50,8 +59,16 @@ draws = len(main_df[(main_df['re_ranker_advantage']==0)])
 print("re_ranker_wins", re_ranker_wins)
 print("bm25_wins", bm25_wins)
 print("draws", draws)
+print("total",re_ranker_wins + bm25_wins + draws )
 
 
-# Plot
+
+# Plot the search data
 main_df.plot('bm25_NDCG_at_rank_10','re_ranker_NDCG_at_rank_10',kind='scatter', color='red')
+
+# Plot a line 
+x = np.linspace(0, 1, 10)
+plt.plot(x, x, color='black')
+
+plt.gca().set_aspect('equal', adjustable='box') # Set axis equal
 plt.show()
