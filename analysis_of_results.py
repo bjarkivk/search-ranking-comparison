@@ -40,6 +40,9 @@ print(main_df)
 # Best re-ranker efforts
 print(main_df[main_df['re_ranker_advantage']>0.3])
 
+# Best bm25 efforts
+print(main_df[main_df['re_ranker_advantage']<-0.2])
+
 # Find mean of the scores
 bm25_NDCG_mean = main_df["bm25_NDCG_at_rank_10"].mean()
 re_ranker_NDCG_mean = main_df["re_ranker_NDCG_at_rank_10"].mean()
